@@ -1,5 +1,5 @@
 /* Mawid service worker — app shell offline + opportunistic image cache */
-const VERSION = '1.3.1-mtvqus52';
+const VERSION = '1.3.1-mtvrkty4';
 const SHELL = `mawid-shell-${VERSION}`;
 const IMAGES = 'mawid-images-v1';
 const SHELL_FILES = [
@@ -15,7 +15,8 @@ const IMAGE_HOSTS = ['image.tmdb.org', 'media.rawg.io', 'cdn.cloudflare.steamsta
 const MAX_IMAGES = 600;
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(caches.open(SHELL).then((c) => c.addAll(SHELL_FILES)).then(() => self.skipWaiting()));
+  // Precache what exists; a missing optional file (a font, an icon) must not break offline support
+  event.waitUntil(caches.open(SHELL).then((c) => Promise.allSettled(SHELL_FILES.map((f) => c.add(f).catch(() => null)))).then(() => self.skipWaiting()));
 });
 
 self.addEventListener('activate', (event) => {

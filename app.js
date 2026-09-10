@@ -138,6 +138,7 @@
     const effective = theme === 'system' ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : theme;
     document.documentElement.setAttribute('data-theme', effective);
     document.body.classList.toggle('reduce-motion', !!S.prefs.reduceMotion);
+    document.documentElement.style.setProperty('--ui', String(Number(S.prefs.uiScale) || 1));
     document.title = l === 'ar' ? 'موعد' : 'Mawid';
   }
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { if (S.prefs.theme === 'system') applyPrefsToDom(); });
@@ -281,7 +282,7 @@
       html = extraViews[S.view].render();
       c.classList.add('custom-view');
       c.innerHTML = html;
-      c.scrollTop = 0;
+      c.scrollTop = 0; if (c.parentElement) c.parentElement.scrollTop = 0;
       mountedView = S.view;
       if (extraViews[S.view].mount) extraViews[S.view].mount(c);
       if (S.heroTimer) { clearInterval(S.heroTimer); S.heroTimer = null; }
@@ -299,7 +300,7 @@
       case 'settings': html = viewSettings(); break;
     }
     c.innerHTML = html;
-    if (S.view !== 'settings') c.scrollTop = 0;
+    if (S.view !== 'settings') { c.scrollTop = 0; if (c.parentElement) c.parentElement.scrollTop = 0; }
     setupHero();
     bgFromView();
   }
@@ -553,6 +554,8 @@
         <div class="field"><div class="lbl"><b>${t('theme')}</b></div><div class="ctl"><div class="seg">${['dark', 'light', 'system'].map((v) => `<button class="${(p.theme || 'dark') === v ? 'active' : ''}" data-action="pref-set" data-k="theme" data-v="${v}">${t('theme_' + v)}</button>`).join('')}</div></div></div>
         <div class="field"><div class="lbl"><b>${t('region')}</b></div><div class="ctl"><div class="seg"><button class="${region() === 'SA' ? 'active' : ''}" data-action="pref-set" data-k="region" data-v="SA">${t('region_sa')}</button><button class="${region() === 'US' ? 'active' : ''}" data-action="pref-set" data-k="region" data-v="US">${t('region_us')}</button></div></div></div>
         <div class="field"><div class="lbl"><b>${t('card_style')}</b><small>${t('card_style_hint')}</small></div><div class="ctl"><div class="seg"><button class="${(p.cardStyle || 'landscape') === 'landscape' ? 'active' : ''}" data-action="pref-set" data-k="cardStyle" data-v="landscape">${I.grid}${t('view_grid')}</button><button class="${p.cardStyle === 'poster' ? 'active' : ''}" data-action="pref-set" data-k="cardStyle" data-v="poster">${I.poster}${t('view_poster')}</button></div></div></div>
+        ${isWeb() ? `<div class="field col"><div class="lbl"><b>${t('ui_scale')}</b><small>${t('ui_scale_hint')}</small></div>
+          <div class="scale-row"><span class="scale-a">A</span><input type="range" class="scale-range" data-action="ui-scale" min="0.8" max="1.4" step="0.05" value="${Number(p.uiScale) || 1}"><span class="scale-A">A</span><b class="num scale-val">${Math.round((Number(p.uiScale) || 1) * 100)}%</b><button class="btn sm ghost" data-action="ui-scale-reset">${t('reset')}</button></div></div>` : ''}
         <div class="field"><div class="lbl"><b>${t('show_hijri')}</b></div><div class="ctl">${sw('showHijri')}</div></div>
         <div class="field"><div class="lbl"><b>${t('show_logos')}</b><small>${t('show_logos_hint')}</small></div><div class="ctl">${sw('showLogos')}</div></div>
         <div class="field"><div class="lbl"><b>${t('hide_indian')}</b><small>${t('hide_indian_hint')}</small></div><div class="ctl">${sw('hideIndian')}</div></div>
@@ -911,6 +914,7 @@
         case 'status': { const cur = userOf(S.modalId).status; await setUserPatch(S.modalId, { status: cur === el.dataset.v ? null : el.dataset.v }); renderModal(); break; }
         case 'ics': { const r = await window.mawid.exportIcs([id]); if (r.ok) toast(t('toast_ics')); break; }
         case 'ics-all': { const ids = Object.entries(S.user).filter(([, u]) => u.favorite).map(([k]) => k); const r = await window.mawid.exportIcs(ids); if (r.ok) toast(t('toast_ics')); break; }
+        case 'ui-scale-reset': await setPrefs({ uiScale: 1 }); renderContent(); break;
         case 'pref-toggle': await setPrefs({ [el.dataset.k]: !S.prefs[el.dataset.k] }); if (el.dataset.k === 'hideIndian') await reloadState(); renderAll(); break;
         case 'pref-set': await setPrefs({ [el.dataset.k]: el.dataset.v }); renderAll(); break;
         case 'notify-day': { const d = Number(el.dataset.v); const cur = new Set(S.prefs.notifyDays || []); cur.has(d) ? cur.delete(d) : cur.add(d); await setPrefs({ notifyDays: [...cur].sort((x, y) => x - y) }); renderContent(); break; }
@@ -931,9 +935,15 @@
       if (!el) return;
       if (el.dataset.action === 'filter-genre') { S.filters.genre = el.value || null; renderContent(); }
       if (el.dataset.action === 'pref-select') { await setPrefs({ [el.dataset.k]: Number(el.value) }); }
+      if (el.dataset.action === 'ui-scale') { await setPrefs({ uiScale: Number(el.value) }); }
     });
 
     document.addEventListener('input', (e) => {
+      if (e.target.dataset && e.target.dataset.action === 'ui-scale') {
+        document.documentElement.style.setProperty('--ui', e.target.value);
+        const v = e.target.parentElement.querySelector('.scale-val'); if (v) v.textContent = Math.round(Number(e.target.value) * 100) + '%';
+        return;
+      }
       if (e.target.id === 'search-input') {
         S.query = e.target.value;
         debouncedSearch();

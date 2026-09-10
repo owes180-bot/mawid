@@ -1,5 +1,5 @@
 /* Mawid service worker — app shell offline + opportunistic image cache */
-const VERSION = '1.3.1-mtvrkty4';
+const VERSION = '1.3.1-mtvsazg3';
 const SHELL = `mawid-shell-${VERSION}`;
 const IMAGES = 'mawid-images-v1';
 const SHELL_FILES = [

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https: data: blob:; media-src 'self' https: blob:; frame-src https://www.youtube-nocookie.com https://www.youtube.com; style-src 'self' 'unsafe-inline'; script-src 'self' https://www.youtube.com https://s.ytimg.com; font-src 'self'; connect-src 'self' https://api.themoviedb.org https://api.rawg.io; worker-src 'self';">
+  <title>موعد — Mawid</title>
+  <meta name="application-name" content="موعد">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="موعد">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#0a0a0f">
+  <meta name="color-scheme" content="dark light">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="mobile.css">
+</head>
+<body class="web">
+  <div class="bg" id="bg" aria-hidden="true">
+    <div class="bg-mesh"><span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span></div>
+    <div class="bg-img" id="bg-a"></div>
+    <div class="bg-img" id="bg-b"></div>
+    <div class="bg-veil"></div>
+  </div>
+
+  <div class="titlebar" id="titlebar">
+    <div class="titlebar-drag"></div>
+    <div class="win-controls" id="win-controls"></div>
+  </div>
+
+  <div class="app" id="app">
+    <aside class="sidebar" id="sidebar"></aside>
+    <main class="main" id="main">
+      <header class="topbar" id="topbar"></header>
+      <section class="content" id="content"></section>
+    </main>
+  </div>
+
+  <div id="modal-root"></div>
+  <div id="toast-root" class="toast-root"></div>
+
+  <script src="bridge.js"></script>
+  <script src="i18n.js"></script>
+  <script src="util.js"></script>
+  <script src="app.js"></script>
+  <script src="ios.js"></script>
+</body>
+</html>
